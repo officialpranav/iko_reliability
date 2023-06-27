@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:iko_reliability_flutter/admin/cache_notifier.dart';
 import 'package:iko_reliability_flutter/admin/process_state_notifier.dart';
 import 'package:iko_reliability_flutter/admin/settings.dart';
+import 'package:iko_reliability_flutter/creation/asset_creation_notifier.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality.dart';
 import 'package:iko_reliability_flutter/criticality/asset_criticality_notifier.dart';
 import 'package:iko_reliability_flutter/routes/route.gr.dart';
@@ -41,6 +42,8 @@ class _EndDrawerState extends State<EndDrawer> {
     var themeManager = Provider.of<ThemeManager>(context);
     if (ModalRoute.of(context)!.settings.name == 'AssetCriticalityRoute') {
       return assetCriticalityEndDrawer(context, themeManager);
+    } else if (ModalRoute.of(context)!.settings.name == 'AssetRoute') {
+      return assetCreationEndDrawer(context, themeManager);
     } else {
       return defaultEndDrawer(context, themeManager);
     }
@@ -390,5 +393,67 @@ class _EndDrawerState extends State<EndDrawer> {
         ),
       );
     });
+  }
+
+  ///Widget for asset creation end drawer
+  Widget assetCreationEndDrawer(
+      BuildContext context, ThemeManager themeManager) {
+    return Consumer<AssetCreationNotifier>(
+      builder: (context, assetCreationNotifier, child) {
+        return Drawer(
+          child: ListView(
+            children: <Widget>[
+              DrawerHeader(
+                  child: ListTile(
+                title: const Text(
+                  'Asset Creation Settings',
+                  style: TextStyle(fontSize: 24),
+                ),
+                trailing: Switch(
+                    //true => darkmode on
+                    value: (themeManager.themeMode == ThemeMode.dark),
+                    onChanged: (value) {
+                      themeManager.toggleTheme(value, context);
+                    },
+                    thumbIcon: MaterialStateProperty.resolveWith<Icon?>(
+                        (Set<MaterialState> states) {
+                      return (themeManager.themeMode == ThemeMode.dark)
+                          ? const Icon(Icons.dark_mode_rounded)
+                          : const Icon(Icons.light_mode_rounded);
+                    })),
+              )),
+              ListTile(
+                title: const Text('Plant Site'),
+                trailing: DropdownButton(
+                  value: assetCreationNotifier.selectedSite,
+                  items: () {
+                    List<DropdownMenuItem<String>> list = [
+                      const DropdownMenuItem(
+                          value: 'NONE', child: Text('Select a site'))
+                    ];
+                    List<String> loadedSettings = (context
+                                .read<SettingsNotifier>()
+                                .getSetting(ApplicationSetting.loadedSites)
+                            as Set<String>)
+                        .toList();
+                    loadedSettings.sort((a, b) =>
+                        a.compareTo(b)); //put them in alphabetical order
+                    list.addAll(loadedSettings.map((e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(siteIDAndDescription[e] ?? 'NONE'))));
+                    return list;
+                  }(),
+                  onChanged: (newValue) {
+                    context
+                      .read<AssetCreationNotifier>()
+                      .setSite(newValue.toString());
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

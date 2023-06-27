@@ -16,6 +16,7 @@ import 'admin/end_drawer.dart';
 import 'admin/template_notifier.dart';
 import 'bin/check_update.dart';
 import 'criticality/asset_criticality_notifier.dart';
+import 'creation/asset_creation_notifier.dart';
 import 'criticality/criticality_notifier.dart';
 import 'admin/process_state_notifier.dart';
 
@@ -75,6 +76,7 @@ class MyApp extends StatelessWidget {
           ChangeNotifierProvider(create: (context) => Cache()),
           ChangeNotifierProvider(
               create: (context) => AssetCriticalityNotifier()),
+          ChangeNotifierProvider(create: (context) => AssetCreationNotifier()),
         ],
         child: Builder(
           builder: (context) {
